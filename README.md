@@ -65,7 +65,7 @@ Notice the estimate is pretty close, but there's still some noise, mostly on the
 
 ![Line Estimate 2](docs/images/sample-line-2.jpg)
 
-That's removed a lot of the noise, but notice there's still a tiny bit of noise in the top-left part of the image. For this setup, the laser was positioned below the camera, which means that the line should never appear above the middle row. So can assume any laser line pixels detected above the middle row are noise. That gives us our final image, which almost perfectly detects the laser projection:
+That's removed a lot of the noise, but notice there's still a tiny bit of noise in the top-left part of the image. For this setup, the laser was positioned below the camera, which means that the line should never appear above the middle row. So we can assume any laser line pixels detected above the middle row are noise. That gives us our final image, which almost perfectly detects the laser projection:
 
 ![Line Estimate 3](docs/images/sample-line-3.jpg)
 
