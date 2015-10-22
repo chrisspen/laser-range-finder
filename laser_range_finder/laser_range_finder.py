@@ -1,4 +1,5 @@
 from __future__ import print_function
+import os
 from math import pi, tan
 
 from PIL import Image
@@ -31,7 +32,7 @@ class LaserRangeFinder(object):
         # be considered valid.
         self.outlier_filter_threshold = float(kwargs.pop('outlier_filter_threshold', 1))
         
-    def get_distance(self, off_img, on_img, save_images_dir=None):
+    def get_distance(self, off_img, on_img, save_images_dir=None, **kwargs):
         """
         Calculates distance using two images.
         
@@ -44,22 +45,32 @@ class LaserRangeFinder(object):
             assert os.path.isdir(save_images_dir), 'Invalid directory: %s' % save_images_dir
         
         if isinstance(off_img, basestring):
-            off_img = Image.open(os.path.expanduser(off_img))
+            off_img = Image.open(os.path.expanduser(off_img)).convert('RGBA')
             
         if isinstance(on_img, basestring):
-            on_img = Image.open(os.path.expanduser(on_img))
+            on_img = Image.open(os.path.expanduser(on_img)).convert('RGBA')
         
         # Normalize image brightness.
         off_img = Image.fromarray(utils.normalize(np.array(off_img)).astype('uint8'), 'RGBA')
+        if save_images_dir:
+            off_img.save(os.path.join(save_images_dir, kwargs.pop('off_img_norm_fn', 'off_img_norm.jpg')))
         on_img = Image.fromarray(utils.normalize(np.array(on_img)).astype('uint8'), 'RGBA')
+        if save_images_dir:
+            on_img.save(os.path.join(save_images_dir, kwargs.pop('on_img_norm_fn', 'on_img_norm.jpg')))
         
         # Strip out non-red channels.
         off_img = utils.only_red(off_img)
+        if save_images_dir:
+            off_img.save(os.path.join(save_images_dir, kwargs.pop('off_img_norm_red_fn', 'off_img_norm_red.jpg')))
         on_img = utils.only_red(on_img)
+        if save_images_dir:
+            on_img.save(os.path.join(save_images_dir, kwargs.pop('on_img_norm_red_fn', 'on_img_norm_red.jpg')))
                 
         # Calculate difference.
         # The laser line should now be the brightest pixels. 
         diff_img = difference(off_img, on_img)
+        if save_images_dir:
+            diff_img.save(os.path.join(save_images_dir, kwargs.pop('diff_img_fn', 'diff_img.jpg')))
         
         # Estimate the pixels that are the laser by
         # finding the row in each column with maximum brightness.
@@ -68,13 +79,16 @@ class LaserRangeFinder(object):
         if save_images_dir:
             # If saving a result image, create an empty black image which we'll later map
             # the laser line into.
-            out = Image.new("L", x.size, "black")
-            pix = out.load()
+            out1 = Image.new("L", x.size, "black")
+            pix1 = out1.load()
+            out2 = Image.new("L", x.size, "black")
+            pix2 = out2.load()
+            out3 = Image.new("L", x.size, "black")
+            pix3 = out3.load()
         y = np.asarray(x.getdata(), dtype=np.float64).reshape((x.size[1], x.size[0]))
         laser_measurements = [0]*width # [row]
         laser_brightness = [0]*width # [brightness]
         for col_i in xrange(y.shape[1]):
-            i += 1
             col_max = max([(y[row_i][col_i], row_i) for row_i in xrange(y.shape[0])])
             col_max_brightness, col_max_row = col_max
             #print col_i, col_max
@@ -91,19 +105,30 @@ class LaserRangeFinder(object):
             outlier_level = brightness_mean - brightness_std * self.outlier_filter_threshold
         final_measurements = [-1]*width # [brightest row]
         for col_i, col_max_row in enumerate(laser_measurements):
-            
+        
+            if save_images_dir:    
+                pix1[col_i, col_max_row] = 255
+                    
+            if not self.filter_outliers \
+            or (self.filter_outliers and laser_brightness[col_i] > outlier_level):
+                if save_images_dir:
+                    pix2[col_i, col_max_row] = 255
+                    
             # Assuming the laser is mounted below the camera,
             # we can assume all points above the centerline are noise.
-            if col_max_row < max_height/2:
+            if col_max_row < height/2:
                 continue
                 
-            if not self.filter_outliers or (self.filter_outliers and laser_brightness[col_i] > outlier_level):
+            if not self.filter_outliers \
+            or (self.filter_outliers and laser_brightness[col_i] > outlier_level):
                 if save_images_dir:
-                    pix[col_i, col_max_row] = 255
+                    pix3[col_i, col_max_row] = 255
                 final_measurements[col_i] = col_max_row
         
         if save_images_dir:
-            out.save(os.path.join(save_images_dir, 'laser-line.jpg'))
+            out1.save(os.path.join(save_images_dir, kwargs.pop('line_img1_fn', 'line1.jpg')))
+            out2.save(os.path.join(save_images_dir, kwargs.pop('line_img2_fn', 'line2.jpg')))
+            out3.save(os.path.join(save_images_dir, kwargs.pop('line_img3_fn', 'line3.jpg')))
         
         #https://sites.google.com/site/todddanko/home/webcam_laser_ranger
         #https://shaneormonde.wordpress.com/2014/01/25/webcam-laser-rangefinder/
@@ -134,7 +159,7 @@ class LaserRangeFinder(object):
                 D_lst.append(laser_row_i)
             else:
                 pfc = abs(laser_row_i - height)
-                D = h/tan(pfc*rpc + self.ro)
+                D = self.h/tan(pfc*rpc + self.ro)
                 D_lst.append(D)
             
         return D_lst

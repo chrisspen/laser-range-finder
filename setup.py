@@ -1,15 +1,27 @@
 import os
 import sys
 
-from setuptools import setup, find_packages, Command
+from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
 
 import laser_range_finder
 
-def get_reqs(testing=False):
-    return [
-        'Pillow>=2.3.0',
-        'numpy>=1.8.2',
-    ]
+CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+
+def get_reqs():
+    return open(os.path.join(CURRENT_DIR, 'requirements.txt')).readlines()
+
+class Tox(TestCommand):
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import tox
+        errno = tox.cmdline(self.test_args)
+        sys.exit(errno)
 
 setup(
     name='laser_range_finder',
@@ -34,6 +46,6 @@ setup(
     ],
     platforms=['OS Independent'],
     cmdclass={
-        #'test': TestCommand,
+        'test': Tox,
     },
 )

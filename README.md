@@ -51,7 +51,7 @@ Notice that the brightness differs considerably between the two images. Later, w
 
 Since these images are RGB, but the laser is red, we remove some noise by stripping out the blue and green channels using `utils.only_red()` giving us:
 
-![Sample Image A](docs/images/sample-a-2.jpg) ![Sample Image B](docs/images/sample-b-3.jpg)
+![Sample Image A](docs/images/sample-a-2.jpg) ![Sample Image B](docs/images/sample-b-2.jpg)
 
 Now we calculate the difference of the images. If the only change between the images was the laser line, then the resulting image should be completely black with the laser appearing as bright white. In practice, there will still be considerable noise, but the difference will eliminate most of that, giving us:
 
@@ -72,3 +72,13 @@ That's removed a lot of the noise, but notice there's still a little left in the
 We can then use a little trigonometry to convert the white pixel's offset from the middle row into a physical distance of the laser projection.
 
 For reference, the source images used in this example were captured with a 5MP NoIR camera connected to a Raspberry Pi 2 and a 1mW 3V red laser line diode mounted 22.5 mm from the camera and controlled directly from a Raspberry Pi GPIO pin.
+
+# Testing
+
+To run tests:
+
+    tox
+
+or:
+
+    py.test -s
