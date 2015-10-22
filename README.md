@@ -41,15 +41,15 @@ If you don't need the specificity of a per-pixel distance measurement, but just 
 
 # Methodology
 
-The method assumes we start with two images, a reference image A known to contain no laser line, and an image B that definitely contains a laser line but possibly distorted. We could potentially just use the single image containing the laser line, but have a negative image greatly helps us remove noise. So we start with the following samples images:
+The method assumes we start with two images, a reference image A known to contain no laser line, and an image B that definitely contains a laser line but possibly distorted. We could potentially just use the single image containing the laser line, but having a negative image greatly helps us remove noise. So we start with the following sample images:
 
 ![Sample Image A](docs/images/sample-a-0.jpg) ![Sample Image B](docs/images/sample-b-0.jpg)
 
-Notice that the brightness differs considerably between the two images. Later, we'll want to isolate the laser line by finding the difference between the two images, but this difference in overall brightness will interfere with that. So we fix this by using `utils.normalize()` giving us:
+Notice that the brightness differs considerably between the two images. Later, we'll want to isolate the laser line by finding the difference between the two images, but this difference in overall brightness will interfere with that. So we fix this by using `utils.normalize()`, giving us:
 
 ![Sample Image A](docs/images/sample-a-1.jpg) ![Sample Image B](docs/images/sample-b-1.jpg)
 
-Since these images are RGB, but the laser is red, we remove some noise by stripping out the blue and green channels using `utils.only_red()` giving us:
+Since these images are RGB, but the laser is red, we remove some noise by stripping out the blue and green channels using `utils.only_red()`, giving us:
 
 ![Sample Image A](docs/images/sample-a-2.jpg) ![Sample Image B](docs/images/sample-b-2.jpg)
 
@@ -61,11 +61,11 @@ Finally, we make a "best guess" as to where the laser line is. Since we know the
 
 ![Line Estimate 1](docs/images/sample-line-1.jpg)
 
-Notice the estimate is pretty close, but there's still has some noise, mostly on the left-hand side of the image where the laser line is absorbed by a matte black finish. We fix this by calculating the line's mean and standard deviation brightness, and ignore anything that's less than `mean - stddev`, giving us:
+Notice the estimate is pretty close, but there's still some noise, mostly on the left-hand side of the image where the laser line is absorbed by a matte black finish. We fix this by calculating the line's mean and standard deviation brightness, and ignore anything that's less than `mean - stddev`, giving us:
 
 ![Line Estimate 2](docs/images/sample-line-2.jpg)
 
-That's removed a lot of the noise, but notice there's still a little left in the top of the image. For this setup, the laser was positions below the camera, which means that the line should never appear above the middle row, so can assume any laser line pixels detected above the middle row are noise. That gives us our final image, which almost perfectly detects the laser projection:
+That's removed a lot of the noise, but notice there's still a tiny bit of noise in the top-left part of the image. For this setup, the laser was positioned below the camera, which means that the line should never appear above the middle row. So can assume any laser line pixels detected above the middle row are noise. That gives us our final image, which almost perfectly detects the laser projection:
 
 ![Line Estimate 3](docs/images/sample-line-3.jpg)
 
