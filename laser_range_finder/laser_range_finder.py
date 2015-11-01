@@ -2,9 +2,13 @@ from __future__ import print_function
 import os
 from math import pi, tan
 
-from PIL import Image
-from PIL.ImageChops import difference
-import numpy as np
+try:
+    from PIL import Image
+    from PIL import ImageFilter
+    from PIL.ImageChops import difference
+    import numpy as np
+except ImportError:
+    pass
 
 from . import utils
 
@@ -31,6 +35,8 @@ class LaserRangeFinder(object):
         # The number of standard deviations below the mean above which a laser pixel will
         # be considered valid.
         self.outlier_filter_threshold = float(kwargs.pop('outlier_filter_threshold', 1))
+        
+        self.blur_radius = 2
         
     def get_distance(self, off_img, on_img, save_images_dir=None, **kwargs):
         """
@@ -71,6 +77,11 @@ class LaserRangeFinder(object):
         diff_img = difference(off_img, on_img)
         if save_images_dir:
             diff_img.save(os.path.join(save_images_dir, kwargs.pop('diff_img_fn', 'diff_img.jpg')))
+        
+        if self.blur_radius:
+            diff_img = diff_img.filter(ImageFilter.GaussianBlur(radius=self.blur_radius))
+            if save_images_dir:
+                diff_img.save(os.path.join(save_images_dir, kwargs.pop('diff_blur_img_fn', 'diff2_img.jpg')))
         
         # Estimate the pixels that are the laser by
         # finding the row in each column with maximum brightness.
@@ -158,8 +169,14 @@ class LaserRangeFinder(object):
                 # No laser could be detected in this column.
                 D_lst.append(laser_row_i)
             else:
-                pfc = abs(laser_row_i - height)
-                D = self.h/tan(pfc*rpc + self.ro)
+                pfc = abs(laser_row_i - height/2)
+                #print('pfc = abs(%s - %s) = %s' % (laser_row_i, height, pfc))
+                theta = pfc*rpc + self.ro
+                if theta:
+                    D = self.h/tan(theta)
+                    #print('D = %s/tan(%s * %s + %s)' % (self.h, pfc, rpc, self.ro))
+                else:
+                    D = -1
                 D_lst.append(D)
             
         return D_lst

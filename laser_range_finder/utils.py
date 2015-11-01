@@ -1,7 +1,10 @@
-from PIL import Image
-import numpy as np
+try:
+    from PIL import Image
+    import numpy as np
+except ImportError:
+    pass
 
-def compress_list(lst, bins=10):
+def compress_list(lst, bins=10, as_int=0):
     """
     Averages a list of numbers into smaller bins.
     """
@@ -10,6 +13,8 @@ def compress_list(lst, bins=10):
     for bin in xrange(bins):
         samples = lst[bin*chunk_size:bin*chunk_size+chunk_size]
         new_lst.append(sum(samples)/float(len(samples)))
+    if as_int:
+        new_lst = [int(round(_)) for _ in new_lst]
     return new_lst
 
 def only_red(im):
