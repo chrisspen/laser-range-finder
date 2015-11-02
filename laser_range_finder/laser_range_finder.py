@@ -40,11 +40,13 @@ class LaserRangeFinder(object):
         
         # The number of standard deviations below the mean above which a laser pixel will
         # be considered valid.
-        self.outlier_filter_threshold = float(kwargs.pop('outlier_filter_threshold', 2))
+        self.outlier_filter_threshold = float(kwargs.pop('outlier_filter_threshold', 1))
         
-        self.blur_radius = 2
+        self.blur_radius = int(kwargs.pop('blur_radius', 2))
         
         self.laser_position = kwargs.pop('laser_position', 'bottom')
+        
+        self.normalize_brightness = kwargs.pop('normalize_brightness', False)
         
     def get_distance(self, off_img, on_img, save_images_dir=None, as_pfc=False, **kwargs):
         """
@@ -66,12 +68,13 @@ class LaserRangeFinder(object):
             on_img = Image.open(os.path.expanduser(on_img)).convert('RGB')
         
         # Normalize image brightness.
-        off_img = Image.fromarray(utils.normalize(np.array(off_img)).astype('uint8'), 'RGB')
-        if save_images_dir:
-            off_img.save(os.path.join(save_images_dir, kwargs.pop('off_img_norm_fn', 'off_img_norm.jpg')))
-        on_img = Image.fromarray(utils.normalize(np.array(on_img)).astype('uint8'), 'RGB')
-        if save_images_dir:
-            on_img.save(os.path.join(save_images_dir, kwargs.pop('on_img_norm_fn', 'on_img_norm.jpg')))
+        if self.normalize_brightness:
+            off_img = Image.fromarray(utils.normalize(np.array(off_img)).astype('uint8'), 'RGB')
+            if save_images_dir:
+                off_img.save(os.path.join(save_images_dir, kwargs.pop('off_img_norm_fn', 'off_img_norm.jpg')))
+            on_img = Image.fromarray(utils.normalize(np.array(on_img)).astype('uint8'), 'RGB')
+            if save_images_dir:
+                on_img.save(os.path.join(save_images_dir, kwargs.pop('on_img_norm_fn', 'on_img_norm.jpg')))
         
         # Strip out non-red channels.
         off_img = utils.only_red(off_img)
