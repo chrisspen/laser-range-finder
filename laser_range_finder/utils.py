@@ -4,7 +4,7 @@ try:
 except ImportError:
     pass
 
-def compress_list(lst, bins=10, as_int=0):
+def compress_list(lst, bins=10, as_int=0, ignore_negative=True):
     """
     Averages a list of numbers into smaller bins.
     """
@@ -12,6 +12,10 @@ def compress_list(lst, bins=10, as_int=0):
     chunk_size = int(round(len(lst)/float(bins)))
     for bin in xrange(bins):
         samples = lst[bin*chunk_size:bin*chunk_size+chunk_size]
+        if ignore_negative:
+            samples = [_ for _ in samples if _ >= 0]
+            if not samples:
+                samples = [-1]
         new_lst.append(sum(samples)/float(len(samples)))
     if as_int:
         new_lst = [int(round(_)) for _ in new_lst]

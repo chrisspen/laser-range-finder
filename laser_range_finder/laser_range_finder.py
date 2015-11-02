@@ -12,6 +12,9 @@ except ImportError:
 
 from . import utils
 
+TOP = 'top'
+BOTTOM = 'bottom'
+
 class LaserRangeFinder(object):
     
     def __init__(self, **kwargs):
@@ -22,11 +25,14 @@ class LaserRangeFinder(object):
         # Camera's horizontal field-of-view in degrees.
         self.horz_fov_deg = float(kwargs.pop('horz_fov_deg', 53.50))
         
+        # Radian per pixel pitch.
+        self.rpc = float(kwargs.pop('rpc', 0.00103721750257))
+        
         # Radian offset.
         self.ro = float(kwargs.pop('ro', -0.21))
         
         # Distance between camera center and laser.
-        self.h = float(kwargs.pop('h', 22.5))
+        self.h = float(kwargs.pop('h', 22.5)) # mm
         
         # If true, laser pixels that are less bright than the mean brightness minus
         # a factor of the standard deviation will be considered noise and ignored.
@@ -34,11 +40,13 @@ class LaserRangeFinder(object):
         
         # The number of standard deviations below the mean above which a laser pixel will
         # be considered valid.
-        self.outlier_filter_threshold = float(kwargs.pop('outlier_filter_threshold', 1))
+        self.outlier_filter_threshold = float(kwargs.pop('outlier_filter_threshold', 2))
         
         self.blur_radius = 2
         
-    def get_distance(self, off_img, on_img, save_images_dir=None, **kwargs):
+        self.laser_position = kwargs.pop('laser_position', 'bottom')
+        
+    def get_distance(self, off_img, on_img, save_images_dir=None, as_pfc=False, **kwargs):
         """
         Calculates distance using two images.
         
@@ -48,19 +56,20 @@ class LaserRangeFinder(object):
         """
         
         if save_images_dir:
+            save_images_dir = os.path.expanduser(save_images_dir)
             assert os.path.isdir(save_images_dir), 'Invalid directory: %s' % save_images_dir
         
         if isinstance(off_img, basestring):
-            off_img = Image.open(os.path.expanduser(off_img)).convert('RGBA')
+            off_img = Image.open(os.path.expanduser(off_img)).convert('RGB')
             
         if isinstance(on_img, basestring):
-            on_img = Image.open(os.path.expanduser(on_img)).convert('RGBA')
+            on_img = Image.open(os.path.expanduser(on_img)).convert('RGB')
         
         # Normalize image brightness.
-        off_img = Image.fromarray(utils.normalize(np.array(off_img)).astype('uint8'), 'RGBA')
+        off_img = Image.fromarray(utils.normalize(np.array(off_img)).astype('uint8'), 'RGB')
         if save_images_dir:
             off_img.save(os.path.join(save_images_dir, kwargs.pop('off_img_norm_fn', 'off_img_norm.jpg')))
-        on_img = Image.fromarray(utils.normalize(np.array(on_img)).astype('uint8'), 'RGBA')
+        on_img = Image.fromarray(utils.normalize(np.array(on_img)).astype('uint8'), 'RGB')
         if save_images_dir:
             on_img.save(os.path.join(save_images_dir, kwargs.pop('on_img_norm_fn', 'on_img_norm.jpg')))
         
@@ -127,7 +136,9 @@ class LaserRangeFinder(object):
                     
             # Assuming the laser is mounted below the camera,
             # we can assume all points above the centerline are noise.
-            if col_max_row < height/2:
+            if self.laser_position == BOTTOM and col_max_row < height/2:
+                continue
+            elif self.laser_position == TOP and col_max_row > height/2:
                 continue
                 
             if not self.filter_outliers \
@@ -158,26 +169,41 @@ class LaserRangeFinder(object):
         
         # rpc = ? # radians per pixel pitch
         # 180 deg=pi rad
-        rpc = (self.vert_fov_deg*pi/180.)/height
+        #rpc = (self.vert_fov_deg*pi/180.)/height
+        rpc = self.rpc
         
         # ro = ? # radian offset (compensates for alignment errors)
         
+        # If directed, return raw pixels from center instead of distance calculation.
+        if as_pfc:
+            return final_measurements
+        
         # Convert the pixel measurements to distance.
-        D_lst = []
-        for laser_row_i in final_measurements:
-            if laser_row_i < 0:
-                # No laser could be detected in this column.
-                D_lst.append(laser_row_i)
-            else:
-                pfc = abs(laser_row_i - height/2)
-                #print('pfc = abs(%s - %s) = %s' % (laser_row_i, height, pfc))
-                theta = pfc*rpc + self.ro
-                if theta:
-                    D = self.h/tan(theta)
-                    #print('D = %s/tan(%s * %s + %s)' % (self.h, pfc, rpc, self.ro))
-                else:
-                    D = -1
-                D_lst.append(D)
+        D_lst = pixels_to_distance(
+            pixel_rows=final_measurements,
+            rpc=self.rpc,
+            ro=self.ro,
+            h=self.h,
+            max_height=height,
+            max_width=width,
+        )
             
         return D_lst
-    
+
+def pixels_to_distance(pixel_rows, rpc, ro, h, max_height, max_width):
+    D_lst = []
+    for laser_row_i in pixel_rows:
+        if laser_row_i < 0:
+            # No laser could be detected in this column.
+            D_lst.append(laser_row_i)
+        else:
+            pfc = abs(laser_row_i - max_height/2)
+            #print('pfc = abs(%s - %s) = %s' % (laser_row_i, height, pfc))
+            theta = rpc * pfc + ro
+            if theta:
+                D = h/tan(theta)
+                #print('D = %s/tan(%s * %s + %s)' % (self.h, pfc, rpc, self.ro))
+            else:
+                D = -1
+            D_lst.append(D)
+    return D_lst

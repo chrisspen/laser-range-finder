@@ -73,6 +73,26 @@ We can then use a little trigonometry to convert the white pixel's offset from t
 
 For reference, the source images used in this example were captured with a 5MP NoIR camera connected to a Raspberry Pi 2 and a 1mW 3V red laser line diode mounted 22.5 mm from the camera and controlled directly from a Raspberry Pi GPIO pin.
 
+# Calibration
+
+Although this package is agnostic about how you acquire your images, it still assumes the capture source is calibrated, and that these calibration parameters are entered correctly. The calibration sequence is nearly identical to the process outlined [here](https://sites.google.com/site/todddanko/home/webcam_laser_ranger) and [here](https://shaneormonde.wordpress.com/2014/01/25/webcam-laser-rangefinder/).
+
+1. Position your apparatus towards a wall, at the maximum distance still detectable, with no other objects in view and take a measurement. Confirm the laser line appears close to the center of the image. Ensure the laser line is level across the image. 
+
+2. Position your apparatus in front of several objects at known distances, each visibly marked, and take a measurement, outputting pfc instead of distance:
+
+    ./test_range_finder.py --save --laser-position=top --as-pfc
+    
+This will output a list of integers representing the laser's estimated row for each column. Enter these into lrf_calibrate as pfc_readings.
+
+Next, open laser-on.jpg in an image editor and record the colum of each reference point whose distance you manually measured and enter these into lrf_calibrate as positions.
+
+Next, enter the manual distance measurements you took and enter these into lrf_calibrate as distances.
+
+Next, enter your `h` into lrf_calibrate.py.
+
+Then, run `./lrf_calibrate.py`. This will calculate and output your `rpc` and `ro` values. Pass these into your instance of `LaserRangeFinder()`. 
+
 # Testing
 
 To run tests:
