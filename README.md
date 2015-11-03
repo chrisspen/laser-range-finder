@@ -47,27 +47,27 @@ The method assumes we start with two images, a reference image A known to contai
 
 Notice that the brightness differs considerably between the two images. Later, we'll want to isolate the laser line by finding the difference between the two images, but this difference in overall brightness will interfere with that. So we fix this by using `utils.normalize()`, giving us:
 
-![Sample Image A](docs/images/sample1/sample-a-1.jpg) ![Sample Image B](docs/images/sample1/sample-b-1.jpg)
+![Sample Image A](docs/images/sample1/_sample-a-1.jpg) ![Sample Image B](docs/images/sample1/_sample-b-1.jpg)
 
 Since these images are RGB, but the laser is red, we remove some noise by stripping out the blue and green channels using `utils.only_red()`, giving us:
 
-![Sample Image A](docs/images/sample1/sample-a-2.jpg) ![Sample Image B](docs/images/sample1/sample-b-2.jpg)
+![Sample Image A](docs/images/sample1/_sample-a-2.jpg) ![Sample Image B](docs/images/sample1/_sample-b-2.jpg)
 
 Now we calculate the difference of the images. If the only change between the images was the laser line, then the resulting image should be completely black with the laser appearing as bright white. In practice, there will still be considerable noise, but the difference will eliminate most of that, giving us:
 
-![Difference Image](docs/images/sample1/sample-diff-3.jpg)
+![Difference Image](docs/images/sample1/_sample-diff-3.jpg)
 
 Finally, we make a "best guess" as to where the laser line is. Since we know the line will be roughly horizontal and the laser line should now correspond to the brightest pixels in the image, we scan each column and find the rows with the brightest pixel, giving us:
 
-![Line Estimate 1](docs/images/sample1/sample-line-1.jpg)
+![Line Estimate 1](docs/images/sample1/_sample-line-1.jpg)
 
 Notice the estimate is pretty close, but there's still some noise, mostly on the left-hand side of the image where the laser line is absorbed by a matte black finish. We fix this by calculating the line's mean and standard deviation brightness, and ignore anything that's less than `mean - stddev`, giving us:
 
-![Line Estimate 2](docs/images/sample1/sample-line-2.jpg)
+![Line Estimate 2](docs/images/sample1/_sample-line-2.jpg)
 
 That's removed a lot of the noise, but notice there's still a tiny bit of noise in the top-left part of the image. For this setup, the laser was positioned below the camera, which means that the line should never appear above the middle row. So we can assume any laser line pixels detected above the middle row are noise. That gives us our final image, which almost perfectly detects the laser projection:
 
-![Line Estimate 3](docs/images/sample1/sample-line-3.jpg)
+![Line Estimate 3](docs/images/sample1/_sample-line-3.jpg)
 
 We can then use a little trigonometry to convert the white pixel's offset from the middle row into a physical distance of the laser projection.
 
