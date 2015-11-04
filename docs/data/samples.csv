@@ -1,0 +1,5 @@
+"Off Image","On Image","RPC","RO","Blur Radius","Filter Outliers","Outlier Filter Threshold","Normalize Brightness","Distances 10"
+"sample1/sample1-a-0.jpg","sample1/sample1-b-0.jpg",0.0032974349,"-0.00494930380293",2,1,1,1,"-1, -1, 314, 319, 326, 268, 333, 303, 291, 302"
+"sample2/sample2-a-0.jpg","sample2/sample2-b-0.jpg",0.0032974349,"-0.00494930380293",2,1,1,0,"-1, 288, 296, 324, 345, 309, 287, 327, 320, 297"
+"sample3/sample3-a-0.jpg","sample3/sample3-b-0.jpg",0.0032974349,"-0.00494930380293",2,1,1,0,"1318, 4552, 7479, 185, 180, 181, 187, 2327, 4495, 4495"
+"sample4/sample4-a-0.jpg","sample4/sample4-b-0.jpg",0.0032974349,"-0.00494930380293",2,1,3,0,"2271, 3251, 390, 390, 381, 368, 368, 368, 368, 368"

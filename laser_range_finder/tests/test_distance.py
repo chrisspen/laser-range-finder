@@ -1,28 +1,44 @@
 import os
+import csv
 import pytest
 
 from laser_range_finder import LaserRangeFinder, utils
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 
-def test_sample():
+def test_samples():
+    for i in xrange(4):
+        pass
+
+def test_sample1():
     
-    lrf = LaserRangeFinder()
+    lrf = LaserRangeFinder(
+        laser_position='bottom',
+        rpc=0.00329743488774,
+        ro=-0.00494930380293,
+        blur_radius=2,
+        filter_outliers=True,
+        outlier_filter_threshold=1,
+        normalize_brightness=True,
+    )
     distances = lrf.get_distance(
-        off_img=os.path.join(CURRENT_DIR, '../../docs/images/sample1/sample-a-0.jpg'),
-        on_img=os.path.join(CURRENT_DIR, '../../docs/images/sample1/sample-b-0.jpg'),
+        off_img=os.path.join(CURRENT_DIR, '../../docs/images/sample1/sample1-a-0.jpg'),
+        on_img=os.path.join(CURRENT_DIR, '../../docs/images/sample1/sample1-b-0.jpg'),
         save_images_dir=os.path.join(CURRENT_DIR, '../../docs/images/sample1'),
-        off_img_norm_fn='_sample-a-1.jpg',
-        on_img_norm_fn='_sample-b-1.jpg',
-        off_img_norm_red_fn='_sample-a-2.jpg',
-        on_img_norm_red_fn='_sample-b-2.jpg',
-        diff_img_fn='_sample-diff-3.jpg',
-        diff_blur_img_fn='_sample-diff-4.jpg',
-        line_img1_fn='_sample-line-1.jpg',
-        line_img2_fn='_sample-line-2.jpg',
-        line_img3_fn='_sample-line-3.jpg',
+        off_img_norm_fn='_sample1-a-1.jpg',
+        on_img_norm_fn='_sample1-b-1.jpg',
+        off_img_norm_red_fn='_sample1-a-2.jpg',
+        on_img_norm_red_fn='_sample1-b-2.jpg',
+        diff_img_fn='_sample1-diff-3.jpg',
+        diff_blur_img_fn='_sample1-diff-4.jpg',
+        line_img1_fn='_sample1-line-1.jpg',
+        line_img2_fn='_sample1-line-2.jpg',
+        line_img3_fn='_sample1-line-3.jpg',
     )
     print 'distances:', distances
+    distances_10 = utils.compress_list(distances, as_int=1)
+    print 'distances:', distances_10
+    assert dista
 
 def test_sample2():
     
