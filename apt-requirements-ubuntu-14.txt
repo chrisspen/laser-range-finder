@@ -3,3 +3,4 @@ libjpeg-dev
 libfreetype6-dev
 zlib1g-dev
 libpng12-dev
+gfortran
