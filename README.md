@@ -98,7 +98,7 @@ Then, run `./lrf_calibrate.py`. This will calculate and output your `rpc` and `r
 To run tests:
 
     tox
-    tox -e py27 -- -s laser_range_finder/tests/test_distance.py::test_sample2
+    tox -e py27 -- -s laser_range_finder/tests/test_distance.py::test_samples
 
 or:
 

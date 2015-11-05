@@ -16,6 +16,7 @@ def test_samples(**kwargs):
     for line in csv.DictReader(open(fn)):
         
         cnt = int(line["cnt"])
+        #if cnt != 10: continue
         distances_10 = map(int, line["distances_10"].split(','))
             
         lrf = LaserRangeFinder(
@@ -30,7 +31,7 @@ def test_samples(**kwargs):
             filter_outliers=kwargs.get(
                 'filter_outliers', bool(int(line["filter_outliers"]))),
             outlier_filter_threshold=kwargs.get(
-                'outlier_filter_threshold', int(line["outlier_filter_threshold"])),
+                'outlier_filter_threshold', float(line["outlier_filter_threshold"])),
             normalize_brightness=kwargs.get(
                 'normalize_brightness', bool(int(line["normalize_brightness"]))),
         )
