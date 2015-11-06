@@ -114,8 +114,6 @@ class LaserRangeFinder(object):
         for col_i in xrange(y.shape[1]):
             col_max = max([(y[row_i][col_i], row_i) for row_i in xrange(y.shape[0])])
             col_max_brightness, col_max_row = col_max
-            #print col_i, col_max
-            #pix[col_i, col_max_row] = 255
             laser_measurements[col_i] = col_max_row
             laser_brightness[col_i] = col_max_brightness
             
@@ -155,28 +153,6 @@ class LaserRangeFinder(object):
             out2.save(os.path.join(save_images_dir, kwargs.pop('line_img2_fn', 'line2.jpg')))
             out3.save(os.path.join(save_images_dir, kwargs.pop('line_img3_fn', 'line3.jpg')))
         
-        #https://sites.google.com/site/todddanko/home/webcam_laser_ranger
-        #https://shaneormonde.wordpress.com/2014/01/25/webcam-laser-rangefinder/
-        
-        #https://www.raspberrypi.org/documentation/hardware/camera.md
-        #Horizontal field of view     53.50 +/- 0.13 degrees
-        #Vertical field of view     41.41 +/- 0.11 degress
-        
-        # h = distance between laser and camera in mm
-        
-        # D = h/tan(theta)
-        # theta = pfc*rpc + ro
-        
-        # pfc = ? # number of pixels from center of focal plane
-        # Calculated per pixel.
-        
-        # rpc = ? # radians per pixel pitch
-        # 180 deg=pi rad
-        #rpc = (self.vert_fov_deg*pi/180.)/height
-        rpc = self.rpc
-        
-        # ro = ? # radian offset (compensates for alignment errors)
-        
         # If directed, return raw pixels from center instead of distance calculation.
         if as_pfc:
             return final_measurements
@@ -194,6 +170,37 @@ class LaserRangeFinder(object):
         return D_lst
 
 def pixels_to_distance(pixel_rows, rpc, ro, h, max_height, max_width):
+    """
+    Converts a list integers representing the row in each column where a laser line was detected
+    into a list of real-world distances.
+    
+    Technique and code based on:
+    
+        https://sites.google.com/site/todddanko/home/webcam_laser_ranger
+        https://shaneormonde.wordpress.com/2014/01/25/webcam-laser-rangefinder/
+    
+    Arguments:
+    
+        pixel_rows := list of integers
+        
+        rpc := radians per pixel pitch
+        
+        ro := radian offset (compensates for alignment errors)
+            
+        h := distance between laser and camera
+        
+        max_height := camera image height
+        
+        max_width := camera image width
+        
+    Math:
+    
+        for each pixel:
+            pfc = number of pixels from center of focal plane
+            theta = pfc*rpc + ro
+            D = h/tan(theta)
+        
+    """
     D_lst = []
     for laser_row_i in pixel_rows:
         if laser_row_i < 0:
@@ -201,11 +208,9 @@ def pixels_to_distance(pixel_rows, rpc, ro, h, max_height, max_width):
             D_lst.append(laser_row_i)
         else:
             pfc = abs(laser_row_i - max_height/2)
-            #print('pfc = abs(%s - %s) = %s' % (laser_row_i, height, pfc))
             theta = rpc * pfc + ro
             if theta:
                 D = h/tan(theta)
-                #print('D = %s/tan(%s * %s + %s)' % (self.h, pfc, rpc, self.ro))
             else:
                 D = -1
             D_lst.append(D)
