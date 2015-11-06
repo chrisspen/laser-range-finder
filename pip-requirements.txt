@@ -1,3 +1,4 @@
 Pillow>=2.3.0
 numpy>=1.8.2
 pytest>=1.6.1
+cython

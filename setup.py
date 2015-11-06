@@ -3,13 +3,14 @@ import sys
 
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
+#from Cython.Build import cythonize
 
 import laser_range_finder
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 def get_reqs():
-    return open(os.path.join(CURRENT_DIR, 'requirements.txt')).readlines()
+    return open(os.path.join(CURRENT_DIR, 'pip-requirements.txt')).readlines()
 
 class Tox(TestCommand):
 
@@ -44,6 +45,7 @@ setup(
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    #ext_modules=cythonize("laser_range_finder/lrfc.pyx"),
     platforms=['OS Independent'],
     cmdclass={
         'test': Tox,
