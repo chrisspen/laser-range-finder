@@ -15,7 +15,7 @@ Recommended installation is via pip (preferrably inside a virtualenv):
 
 # Usage
 
-Before you can use the class, you'll need to ![calibrate](#calibration) your camera. Calculate your camera's:
+Before you can use the class, you'll need to [calibrate](#calibration) your camera. Calculate your camera's:
 
 * rpc = radians per pixel pitch
 * ro = radian offset
