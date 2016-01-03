@@ -40,7 +40,7 @@ If you don't need the specificity of a per-pixel distance measurement, but just 
 
 # Methodology
 
-The method assumes we start with two images, a reference image A known to contain no laser line, and an image B that definitely contains a laser line but possibly distorted. We could potentially just use the single image containing the laser line, but having a negative image greatly helps us remove noise. So we start with the following sample images:
+The method assumes we start with two images, a reference image A known to contain no laser line, and an image B that definitely contains a laser line but which may possibly be distorted. We could potentially just use the single image containing the laser line, but having a negative image greatly helps us remove noise. So we start with the following sample images:
 
 ![Sample Image A](docs/images/sample1/sample1-a-0.jpg) ![Sample Image B](docs/images/sample1/sample1-b-0.jpg)
 
