@@ -17,15 +17,14 @@ Recommended installation is via pip (preferrably inside a virtualenv):
 
 Before you can use the class, you'll need to calibrate your camera. Calculate your camera's:
 
-* vertical field of view in degrees
-* horizontal field of view in degrees
-* distance between camera center and laser center in millimeters
-* radian offset
+* rpc = radians per pixel pitch
+* ro = radian offset
+* h = distance between camera center and laser center
 
 Then, pass these values when you instantiate the class:
 
     from laser_range_finder import LaserRangeFinder
-    lrf = LaserRangeFinder(vert_fov_deg=50, horz_fov_deg=40, ro=0.01, h=30)
+    lrf = LaserRangeFinder(rpc=0.00103, ro=0.01, h=30)
 
 The package is agnostic to how the images are captured, but assumes you can provide them as either a filename or as a PIL Image instance:
 
