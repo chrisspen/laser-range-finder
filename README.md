@@ -79,19 +79,19 @@ Although this package is agnostic about how you acquire your images, it still as
 
 1. Position your apparatus towards a wall, at the maximum distance still detectable, with no other objects in view and take a measurement. Confirm the laser line appears close to the center of the image. Ensure the laser line is level across the image. 
 
-2. Position your apparatus in front of several objects at known distances, each visibly marked, and take a measurement, outputting pfc instead of distance:
+2. Position your apparatus in front of several objects at known distances, each visibly marked, shine the laser and capture an image.
 
-    ./test_range_finder.py --save --laser-position=top --as-pfc
-    
-This will output a list of integers representing the laser's estimated row for each column. Enter these into lrf_calibrate as pfc_readings.
+Create a file called ![calibrate.yml](docs/data/calibrate.yml) and populate several fields.
 
-Next, open laser-on.jpg in an image editor and record the colum of each reference point whose distance you manually measured and enter these into lrf_calibrate as positions.
+First, add a list attribute called `readings`, which contains the row in each column that contains the laser projection.
 
-Next, enter the manual distance measurements you took and enter these into lrf_calibrate as distances.
+Next, for each manual measurement, identify the corresponding list indexes and enter these measurements into a distances map attribute.
 
-Next, enter your `h` into lrf_calibrate.py.
+Next, enter your `h` value, which is the distance between the center of the camera lens and the center of the laser.
 
-Then, run `./lrf_calibrate.py`. This will calculate and output your `rpc` and `ro` values. Pass these into your instance of `LaserRangeFinder()`. 
+Finally, enter the image width and height.
+
+Then, run `python lrf_calibrate.py <path/to/calibrate.yml>`. This will calculate and output your `rpc` and `ro` values. Pass these into your instance of `LaserRangeFinder(rpc=<rpc>, ro=<ro>)` and it should output accurate distance readings.
 
 # Testing
 
