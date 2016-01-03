@@ -85,11 +85,16 @@ Create a file called ![calibrate.yml](docs/data/calibrate.yml) and populate seve
 
 First, add a list attribute called `readings`, which contains the row in each column that contains the laser projection.
 
-Next, for each manual measurement, identify the corresponding list indexes and enter these measurements into a distances map attribute.
+Next, for each manual measurement, identify the corresponding list indexes and enter these measurements into a map attribute called `distances`. For example, if you manually measured the point `A` to be 34cm from the camera, and you found that point `A` was roughly in column 56, then you'd have a `distances` value that looked like:
 
-Next, enter your `h` value, which is the distance between the center of the camera lens and the center of the laser.
+    distances:
+        56: 34
 
-Finally, enter the image width and height.
+You should enter at least 5 values or more to ensure an accurate calibration.
+
+Next, enter your `h` value, which is the distance between the center of the camera lens and the center of the laser. Ensure the units of this measurement match the units you used for `distances`.
+
+Next, enter the image width and height in pixels.
 
 Then, run `python lrf_calibrate.py <path/to/calibrate.yml>`. This will calculate and output your `rpc` and `ro` values. Pass these into your instance of `LaserRangeFinder(rpc=<rpc>, ro=<ro>)` and it should output accurate distance readings.
 
