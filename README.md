@@ -43,7 +43,7 @@ If you don't need the specificity of a per-pixel distance measurement, but just 
 
 The method assumes we start with two images, a reference image A known to contain no laser line, and an image B that definitely contains a laser line but possibly distorted. We could potentially just use the single image containing the laser line, but having a negative image greatly helps us remove noise. So we start with the following sample images:
 
-![Sample Image A](docs/images/sample1/sample-a-0.jpg) ![Sample Image B](docs/images/sample1/sample-b-0.jpg)
+![Sample Image A](docs/images/sample1/sample1-a-0.jpg) ![Sample Image B](docs/images/sample1/sample1-b-0.jpg)
 
 Notice that the brightness differs considerably between the two images. Later, we'll want to isolate the laser line by finding the difference between the two images, but this difference in overall brightness will interfere with that. So we fix this by using `utils.normalize()`, giving us:
 
