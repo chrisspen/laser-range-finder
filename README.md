@@ -103,10 +103,3 @@ To run tests:
 or:
 
     py.test -s
-
-    py.test -s 
-
-To build c-extension:
-
-    python setup.py build_ext --inplace
-    
