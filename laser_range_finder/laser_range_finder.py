@@ -1,6 +1,6 @@
 from __future__ import print_function
 import os
-from math import pi, tan
+from math import pi, tan, atan
 
 try:
     from PIL import Image
@@ -9,11 +9,79 @@ try:
     import numpy as np
 except ImportError:
     pass
+    
+import yaml
+from scipy import stats
+import numpy as np
 
 from . import utils
 
 TOP = 'top'
 BOTTOM = 'bottom'
+
+def percent_error(expected, actual):
+    return (expected - actual)/float(actual)*100
+
+def calibrate(conf_fn):
+
+    conf = yaml.load(open(conf_fn))
+
+    readings = conf['readings']
+
+    distances = conf['distances'] # {position: distance}
+    
+    h = float(conf['h'])
+    
+    image_width = int(conf['image_width'])
+
+    image_height = int(conf['image_height'])
+    
+    measurements = []
+    for col in sorted(distances.keys()):
+        actual_d = distances[col]
+        pix_dist = readings[col]
+        assert pix_dist > 0
+        pfc = abs(pix_dist - image_height/2)
+        #theta = atan(h/actual_d)
+        measurements.append((actual_d, pfc))
+    
+    #print '\nmeasurements:', measurements
+    
+    x = [_pix_dist for _actual_d, _pix_dist in measurements]
+    y = [atan(h/_actual_d) for _actual_d, _pix_dist in measurements]
+        
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+    #print '\nlinreg:', slope, intercept, r_value, p_value, std_err
+    # y = m * x + b => theta = rpc * pfc + ro
+    # slope = m = rpc
+    # intercept = b = ro
+    rpc = slope
+    ro = intercept
+    print('\n--rpc=%s --ro=%s\n' % (slope, intercept))
+    return rpc, ro
+    
+#     estimated_distances = pixels_to_distance(
+#         pixel_rows=readings,
+#         rpc=rpc,
+#         ro=ro,
+#         h=h,
+#         max_height=image_height,
+#         max_width=image_width,
+#     )
+    #print '\nestimated_distances:', estimated_distances
+#     estimated_distances2 = [_v for _i, _v in enumerate(estimated_distances) if _i in distances.keys()]
+    #print '\nestimated_distances:', estimated_distances2
+    
+#     print '\npixels from center,calc D (mm),actual D (mm),% error'
+#     differences = []
+#     for col in distances.keys():
+#         actual_d = distances[col]
+#         pix_dist = readings[col]
+#         pfc = abs(pix_dist - image_height/2)
+#         estimated_d = estimated_distances[col]
+#         print '%s,%s,%s,%s' % (pfc, estimated_d, actual_d, percent_error(estimated_d, actual_d))
+#         differences.append(abs(actual_d - estimated_d))
+#     print '\naverage error:', sum(differences)/float(len(differences))
 
 class LaserRangeFinder(object):
     

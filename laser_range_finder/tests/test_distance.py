@@ -1,8 +1,9 @@
 import os
 import csv
+import yaml
 import pytest
 
-from laser_range_finder import LaserRangeFinder, utils
+from laser_range_finder import LaserRangeFinder, utils, calibrate, pixels_to_distance
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -112,4 +113,29 @@ def test_optimize():
     best_error, best_params = best
     best_params = dict(zip(param_keys, best_params))
     print 'best:', best_error, best_params
+
+def test_calibrate():
+    fn = os.path.join(CURRENT_DIR, '../../docs/data/calibrate.yml')
+    rpc, ro = calibrate(fn)
+    assert rpc == 0.0032974348877424457
+    assert ro == -0.0049493038029253186
+    
+    calibration_data = yaml.load(open(fn))
+    D_lst = pixels_to_distance(
+        pixel_rows=calibration_data['readings'],
+        rpc=rpc,
+        ro=ro,
+        h=calibration_data['h'],
+        max_height=calibration_data['image_height'],
+        max_width=calibration_data['image_width'],
+    )
+    print('D_lst:', D_lst)
+    
+    mae = []
+    for i, actual_dist in calibration_data['distances'].iteritems():
+        print actual_dist, D_lst[i]
+        mae.append(abs(actual_dist - D_lst[i]))
+    mae = sum(mae)/float(len(mae))
+    print 'MAE:', mae
+    assert mae == 48.857111449781485
     
